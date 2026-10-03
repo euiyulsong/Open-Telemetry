@@ -1,0 +1,35 @@
+extensions:
+  file_storage:
+    directory: /var/lib/otelcol
+
+receivers:
+  otlp:
+    protocols:
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  otlphttp/backend:
+    endpoint: http://backend:5000
+    sending_queue:
+      enabled: true
+      queue_size: 10
+      num_consumers: 1
+      storage: file_storage
+    retry_on_failure:
+      enabled: true
+      initial_interval: 1s
+      max_interval: 5s
+      max_elapsed_time: 30s
+
+service:
+  extensions: [file_storage]
+
+  pipelines:
+    traces:
+      receivers: [otlp]
+      exporters: [otlphttp/backend]
+
+  telemetry:
+    logs:
+      level: debug

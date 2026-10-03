@@ -1,0 +1,21 @@
+services:
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol/config.yaml:ro
+      - ./otel-data:/var/lib/otelcol
+    ports:
+      - "4318:4318"
+      - "8888:8888"
+    depends_on:
+      - backend
+
+  backend:
+    image: python:3.11-slim
+    working_dir: /app
+    volumes:
+      - ./backend.py:/app/backend.py:ro
+    command: ["python", "backend.py"]
+    ports:
+      - "5000:5000"
